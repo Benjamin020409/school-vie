@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600&display=swap');
+
+@theme {
+  --color-ink: #1B2A4A;
+  --color-ink-light: #2E3F63;
+  --color-gold: #C9A227;
+  --color-gold-soft: #D8BE6A;
+  --color-surface: #F5F6F8;
+  --font-display: "Fraunces", serif;
+  --font-sans: "Public Sans", sans-serif;
+}
+
+body {
+  @apply bg-surface text-slate-900;
+  font-family: var(--font-sans);
+}
