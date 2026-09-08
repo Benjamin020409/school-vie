@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GraduationCap } from "lucide-react";
 import { login } from "../lib/api";
+import type { Role } from "../lib/api";
 import { routeForRoles } from "../config/roles";
 
 export default function Login() {
@@ -17,7 +18,7 @@ export default function Login() {
     setChargement(true);
     try {
       const user = await login(email, password);
-      const destination = routeForRoles(user.roles.map((r) => r.name));
+      const destination = routeForRoles(user.roles.map((r: Role) => r.name));
 
       if (!destination) {
         setErreur("Ce compte n'a aucun rôle assigné. Contactez l'administrateur.");
@@ -36,24 +37,24 @@ export default function Login() {
     <div className="flex min-h-screen items-center justify-center bg-surface px-4">
       <div className="flex w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div
-  className="relative hidden w-2/5 flex-col justify-between overflow-hidden bg-ink p-8 text-white md:flex"
-  style={{
-    backgroundImage:
-      "linear-gradient(to right, rgba(201,162,39,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(201,162,39,0.18) 1px, transparent 1px)",
-    backgroundSize: "24px 24px",
-  }}
->
-  <div>
-    <div className="flex items-center gap-2 font-display text-xl font-semibold leading-tight">
-      <GraduationCap size={22} strokeWidth={1.75} className="text-gold-soft" />
-      SCHOOL VIE
-    </div>
-    <div className="mt-1.5 text-xs text-gold-soft">
-      Gestion scolaire
-    </div>
-  </div>
-  <div className="text-xs text-white/50">Année 2026–2027</div>
-</div>
+          className="relative hidden w-2/5 flex-col justify-between overflow-hidden bg-ink p-8 text-white md:flex"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(201,162,39,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(201,162,39,0.18) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        >
+          <div>
+            <div className="flex items-center gap-2 font-display text-xl font-semibold leading-tight">
+              <GraduationCap size={22} strokeWidth={1.75} className="text-gold-soft" />
+              SCHOOL VIE
+            </div>
+            <div className="mt-1.5 text-xs text-gold-soft">
+              Gestion scolaire
+            </div>
+          </div>
+          <div className="text-xs text-white/50">Année 2026–2027</div>
+        </div>
 
         <div className="flex-1 px-8 py-10">
           <h1 className="font-display mb-1 text-lg font-semibold text-ink">

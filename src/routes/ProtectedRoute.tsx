@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getUser } from "../lib/api";
+import type { Role } from "../lib/api";
 import { routeForRoles } from "../config/roles";
 
 type Props = {
@@ -23,7 +24,7 @@ export default function ProtectedRoute({ role, children }: Props) {
     getUser()
       .then((user) => {
         if (annule) return;
-        const nomsRoles = user.roles.map((r) => r.name);
+        const nomsRoles = user.roles.map((r: Role) => r.name);
         if (nomsRoles.includes(role)) {
           setEtat({ statut: "autorise" });
         } else {

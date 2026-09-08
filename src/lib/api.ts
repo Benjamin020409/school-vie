@@ -18,14 +18,17 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export async function login(email: string, password: string) {
+export type Role = { name: string };
+export type User = { id: number; name: string; email: string; roles: Role[] };
+
+export async function login(email: string, password: string): Promise<User> {
   const { data } = await api.post("/login", { email, password });
   localStorage.setItem("auth_token", data.token);
   return data.user;
 }
 
-export async function getUser() {
-  const { data } = await api.get("/me");
+export async function getUser(): Promise<User> {
+  const { data } = await api.get<User>("/me");
   return data;
 }
 
