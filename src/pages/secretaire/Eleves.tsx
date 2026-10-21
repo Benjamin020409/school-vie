@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Pencil, Eye, FileDown, Paperclip, Trash2, Upload } from "lucide-react";
-import { api } from "../../lib/api";
+import { Search, Pencil, Eye, FileDown, Paperclip, Trash2, Upload, IdCard, Image as ImageIcon } from "lucide-react";
+import { api } from "@/lib/api";
 
 type Tuteur = { id: number; nom: string; telephone: string | null; email: string | null; adresse: string | null };
 type Classe = { id: number; nom: string };
@@ -25,7 +25,7 @@ type DocumentEleve = {
   created_at: string;
 };
 
-type Panneau = { id: number; mode: "consulter" | "completer" | "documents" } | null;
+type Panneau = { id: number; mode: "consulter" | "completer" | "documents" | "carte" } | null;
 
 function formatTaille(octets: number | null) {
   if (!octets) return "";
@@ -58,6 +58,18 @@ async function telechargerDocument(doc: DocumentEleve) {
   window.URL.revokeObjectURL(url);
 }
 
+async function telechargerCarte(eleve: Eleve) {
+  const response = await api.get(`/eleves/${eleve.id}/carte-scolaire`, { responseType: "blob" });
+  const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+  const lien = document.createElement("a");
+  lien.href = url;
+  lien.download = `carte-scolaire-${eleve.matricule}.pdf`;
+  document.body.appendChild(lien);
+  lien.click();
+  lien.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 function LigneInfo({ label, valeur }: { label: string; valeur: string }) {
   return (
     <div className="flex justify-between border-b border-slate-100 py-2 text-sm">
@@ -73,6 +85,7 @@ export default function SecretaireEleves() {
   const [panneau, setPanneau] = useState<Panneau>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const inputFichierRef = useRef<HTMLInputElement>(null);
+  const inputPhotoRef = useRef<HTMLInputElement>(null);
 
   const { data: eleves } = useQuery<Eleve[]>({
     queryKey: ["eleves-liste", recherche],
@@ -83,6 +96,19 @@ export default function SecretaireEleves() {
     queryKey: ["documents", panneau?.id],
     queryFn: async () => (await api.get(`/eleves/${panneau!.id}/documents`)).data,
     enabled: panneau?.mode === "documents",
+  });
+
+  const { data: photoUrl } = useQuery<string | null>({
+    queryKey: ["photo-eleve", panneau?.id],
+    queryFn: async () => {
+      try {
+        const response = await api.get(`/eleves/${panneau!.id}/photo`, { responseType: "blob" });
+        return URL.createObjectURL(response.data);
+      } catch {
+        return null;
+      }
+    },
+    enabled: panneau?.mode === "carte",
   });
 
   const completerDossier = useMutation({
@@ -128,6 +154,22 @@ export default function SecretaireEleves() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["documents", panneau?.id] }),
   });
 
+  const uploaderPhoto = useMutation({
+    mutationFn: async ({ eleveId, fichier }: { eleveId: number; fichier: File }) => {
+      const formData = new FormData();
+      formData.append("photo", fichier);
+      return api.post(`/eleves/${eleveId}/photo`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["photo-eleve", panneau?.id] });
+      setErreur(null);
+      if (inputPhotoRef.current) inputPhotoRef.current.value = "";
+    },
+    onError: () => setErreur("Échec de l'envoi de la photo (image uniquement, 2 Mo max)."),
+  });
+
   const selection = eleves?.find((e) => e.id === panneau?.id) ?? null;
 
   async function handleTelecharger(e: Eleve) {
@@ -139,9 +181,23 @@ export default function SecretaireEleves() {
     }
   }
 
+  async function handleTelechargerCarte(e: Eleve) {
+    setErreur(null);
+    try {
+      await telechargerCarte(e);
+    } catch {
+      setErreur("Impossible de générer la carte pour le moment.");
+    }
+  }
+
   function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     if (!panneau || !e.target.files || e.target.files.length === 0) return;
     uploaderDocuments.mutate({ eleveId: panneau.id, fichiers: e.target.files });
+  }
+
+  function handleUploadPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!panneau || !e.target.files || e.target.files.length === 0) return;
+    uploaderPhoto.mutate({ eleveId: panneau.id, fichier: e.target.files[0] });
   }
 
   return (
@@ -209,6 +265,13 @@ export default function SecretaireEleves() {
                   >
                     <Paperclip size={13} />
                     Documents
+                  </button>
+                  <button
+                    onClick={() => setPanneau(estOuvert && panneau?.mode === "carte" ? null : { id: e.id, mode: "carte" })}
+                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-slate-50"
+                  >
+                    <IdCard size={13} />
+                    Carte scolaire
                   </button>
                   <button
                     onClick={() => handleTelecharger(e)}
@@ -389,6 +452,49 @@ export default function SecretaireEleves() {
                   <p className="mt-2 text-xs text-slate-400">
                     Formats acceptés : PDF, JPG, PNG, DOC, DOCX — 5 Mo maximum par fichier.
                   </p>
+                </div>
+              )}
+
+              {estOuvert && panneau?.mode === "carte" && selection && (
+                <div className={`bg-slate-50 px-5 py-4 ${idx < eleves.length - 1 ? "border-b border-slate-100" : ""}`}>
+                  <div className="flex flex-wrap items-start gap-6">
+                    <div>
+                      <div className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">Photo</div>
+                      <div className="flex h-32 w-24 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        {photoUrl ? (
+                          <img src={photoUrl} alt={`${selection.prenom} ${selection.nom}`} className="h-full w-full object-cover" />
+                        ) : (
+                          <ImageIcon size={24} className="text-slate-300" />
+                        )}
+                      </div>
+                      <label className="mt-2 flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-slate-50">
+                        <Upload size={12} />
+                        {uploaderPhoto.isPending ? "Envoi..." : photoUrl ? "Changer" : "Ajouter une photo"}
+                        <input
+                          ref={inputPhotoRef}
+                          type="file"
+                          accept=".jpg,.jpeg,.png"
+                          onChange={handleUploadPhoto}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">Carte scolaire</div>
+                      <p className="mb-3 text-sm text-slate-500">
+                        Génère la carte au format standard (élève, matricule, classe, année scolaire).
+                        {!photoUrl && " Sans photo, un espace vide apparaîtra à la place."}
+                      </p>
+                      <button
+                        onClick={() => handleTelechargerCarte(selection)}
+                        className="flex items-center gap-1.5 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white transition hover:bg-ink-light"
+                      >
+                        <FileDown size={14} />
+                        Télécharger la carte (PDF)
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
