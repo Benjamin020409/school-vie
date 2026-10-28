@@ -10,6 +10,7 @@ import DirecteurEnseignants from "./pages/directeur/Enseignants";
 import DirecteurClasses from "./pages/directeur/Classes";
 import DirecteurBulletins from "./pages/directeur/Bulletins";
 import DirecteurFinances from "./pages/directeur/Finances";
+import DirecteurUtilisateurs from "./pages/directeur/Utilisateurs";
 
 
 
@@ -19,6 +20,7 @@ import SecretaireClasses from "./pages/secretaire/Classes";
 import SecretaireEleves from "./pages/secretaire/Eleves";
 import SecretaireMatieres from "./pages/secretaire/Matiere";
 import SecretaireBulletins from "./pages/secretaire/Bulletins";
+import SecretaireCartesScolaires from "./pages/secretaire/CartesScolaires";
 
 import SecretaireEmploiDuTemps from "./pages/secretaire/EmploiDuTemps";
 
@@ -26,6 +28,7 @@ import SecretaireEmploiDuTemps from "./pages/secretaire/EmploiDuTemps";
 //Comptable
 import ComptableDashboard, { liensComptable } from "./pages/comptable/Dashboard";
 import ComptablePaiements from "./pages/comptable/Paiements";
+import ComptableRapports from "./pages/comptable/Rapports";
 
 
 
@@ -77,6 +80,7 @@ export default function App() {
           <Route path="/directeur/bulletins" element={<DirecteurBulletins />} />
           <Route path="/directeur/enseignants" element={<DirecteurEnseignants />} />
           <Route path="/directeur/finances" element={<DirecteurFinances />} />
+          <Route path="/directeur/utilisateurs" element={<DirecteurUtilisateurs />} />
         </Route>
 
         <Route
@@ -91,6 +95,7 @@ export default function App() {
           <Route path="/secretaire/eleves" element={<SecretaireEleves />} />
           <Route path="/secretaire/matieres" element={<SecretaireMatieres />} />
           <Route path="/secretaire/bulletins" element={<SecretaireBulletins />} />
+          <Route path="/secretaire/cartes" element={<SecretaireCartesScolaires />} />
           <Route path="/secretaire/emploi-du-temps" element={<SecretaireEmploiDuTemps />} />
         </Route>
 
@@ -103,6 +108,7 @@ export default function App() {
         >
           <Route path="/comptable" element={<ComptableDashboard />} />
           <Route path="/comptable/paiements" element={<ComptablePaiements />} />
+          <Route path="/comptable/rapports" element={<ComptableRapports />} />
         </Route>
 
         <Route

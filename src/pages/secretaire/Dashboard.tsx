@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { UserPlus, Users, School, BookOpen, FileText, Plus,  X, RefreshCw, CalendarClock, FileCheck2 } from "lucide-react";
+import { UserPlus, Users, School, BookOpen, FileText, Plus,  X, CreditCard, RefreshCw, CalendarClock, FileCheck2 } from "lucide-react";
 import type { NavLien } from "../../layouts/AppLayout";
 import { api } from "../../lib/api";
 
@@ -10,6 +10,7 @@ export const liensSecretaire: NavLien[] = [
   { to: "/secretaire/classes", label: "Classes", icon: School },
   { to: "/secretaire/matieres", label: "Matières", icon: BookOpen },
   { to: "/secretaire/bulletins", label: "Bulletins", icon: FileCheck2 },
+  { to: "/secretaire/cartes", label: "Cartes scolaires", icon: CreditCard },
   { to: "/secretaire/emploi-du-temps", label: "Emploi du temps", icon: CalendarClock },
   { to: "/secretaire/documents", label: "Documents", icon: FileText },
 ];

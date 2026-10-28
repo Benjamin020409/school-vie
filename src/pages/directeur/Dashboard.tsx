@@ -1,10 +1,11 @@
-import { LayoutDashboard, School, Users, Wallet, CalendarClock, Award, Megaphone } from "lucide-react";
+import { LayoutDashboard, School, Users, UserCog, Wallet, CalendarClock, Award, Megaphone } from "lucide-react";
 import type { NavLien } from "../../layouts/AppLayout";
 
 export const liensDirecteur: NavLien[] = [
   { to: "/directeur", label: "Vue d'ensemble", icon: LayoutDashboard },
   { to: "/directeur/classes", label: "Classes", icon: School },
   { to: "/directeur/enseignants", label: "Enseignants", icon: Users },
+  { to: "/directeur/utilisateurs", label: "Autres utilisateurs", icon: UserCog },
   { to: "/directeur/finances", label: "Finances", icon: Wallet },
   { to: "/directeur/emploi-du-temps", label: "Emploi du temps", icon: CalendarClock },
   { to: "/directeur/bulletins", label: "Bulletins", icon: Award },
